@@ -3,13 +3,14 @@
 var gameOptions = {
   height: 450,
   width: 700,
-  nEnemies: 2,
+  nEnemies: 30,
   padding: 20
 };
 
 var gameStats = {
   score: 0,
-  bestScore: 0
+  bestScore: 0,
+  collisions: 0
 };
 
 var axes = {
@@ -22,15 +23,19 @@ var gameBoard = d3.select('.container').append('svg:svg')
                 .attr('height', gameOptions.height);
 
 var updateScore = function () {
-  d3.select('#current-score')
-      .text(gameStats.score.toString());
+  d3.select('.current')
+      .text('Current Score: ' + gameStats.score.toString());
 };
 
 var updateBestScore = function () {
   gameStats.bestScore = Math.max(gameStats.bestScore, gameStats.score);
 
-  d3.select('#best-score').text(gameStats.bestScore.toString());
+  d3.select('.high').text('Best Score:' + gameStats.bestScore.toString());
 };
+
+var updateCollisions = function () {
+  d3.select('.collisions').text('Collisions:' + gameStats.collisions.toString());
+}
 
 /////////////////////////////////////////////////////////////////////
 // DEFINE PLAYER OBJECTS AND METHODS
@@ -169,6 +174,8 @@ var render = function (enemy_data) {
   var onCollision = function () {
     updateBestScore();
     gameStats.score = 0;
+    gameStats.collisions++;
+    updateCollisions();
     updateScore();
   };
 
