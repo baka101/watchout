@@ -3,7 +3,7 @@
 var gameOptions = {
   height: 450,
   width: 700,
-  nEnemies: 30,
+  nEnemies: 32,
   padding: 20
 };
 
@@ -137,15 +137,68 @@ Player.prototype.setupDragging = function() {
 ///////////////////////////////////////////////////////////////////////
 // CREATE ENEMIES AND ENEMY MOVEMENT
 ////////////////////////////////////////////////////////////////////
+
+
 var createEnemies = function () {
   return _.range(0, gameOptions.nEnemies).map(function(i) {
-    var obj = {id : i,
-      x: Math.random()*100,
-      y: Math.random()*100};
-
+    if (Math.random() > 0.8) {
+      var obj = new FlamingEnemy(i);
+    } else if (Math.random() < 0.2) {
+      var obj = new Taco(i);
+    } else {
+      var obj = new Enemy(i);
+    }
     return obj;
   });
 };
+
+var Enemy = function (id) {
+  this.id = id;
+  this.class = 'enemy';
+  this.imagePath = 'img/poop.png';
+  this.size = 10 + Math.floor(Math.random()*20);
+  this.width = this.size*2;
+  this.height = this.size*2;
+  this.x = Math.random()*100;
+  this.y = Math.random()*100;
+};
+
+Enemy.prototype.updatePosition = function () {
+  this.x = Math.random()*100;
+  this.y = Math.random()*100;
+}
+Enemy.prototype.onCollision = function () {
+  updateBestScore();
+  gameStats.score = 0;
+  gameStats.collisions++;
+  d3.select('.player').attr('xlink:href', 'img/sick.png');
+  d3.timer(function () {
+    d3.select('.player').attr('xlink:href', 'img/smiley.png');
+    return true;
+  }, 1000);
+  updateCollisions();
+  updateScore();
+};
+
+var FlamingEnemy = function (id) {
+  Enemy.call(this, id);
+  this.imagePath = 'img/fire-poop.png';
+  this.width = this.size*1.75;
+  this.height = this.size*1.75;
+}
+
+FlamingEnemy.prototype = Object.create(Enemy.prototype);
+FlamingEnemy.prototype.constructor = FlamingEnemy;
+
+var Taco = function (id) {
+  Enemy.call(this, id);
+  this.imagePath = 'img/taco.gif';
+  this.class = 'enemy powerup';
+}
+
+Taco.prototype = Object.create(Enemy.prototype);
+Taco.prototype.constructor = Taco;
+
 
 /////////////////////////////////////////////////////////////
 // RENDERING GAMEBOARD
@@ -156,10 +209,10 @@ var render = function (enemy_data) {
                     .data(enemy_data, function(d) { return d.id; });
 
   enemies.enter().append('svg:image')
-            .attr('class', 'enemy')
-            .attr('xlink:href', 'img/poop.png')
-            .attr('width', '20')
-            .attr('height', '20')
+            .attr('class', function(enemy) {return enemy.class; })
+            .attr('xlink:href', function(enemy) {return enemy.imagePath; })
+            .attr('width', function(enemy) {return enemy.width; })
+            .attr('height', function(enemy) {return enemy.height; })
             .attr('x', function(enemy) { return axes.x(enemy.x); })
             .attr('y', function(enemy) { return axes.y(enemy.y); })
             .attr('r', 0);
@@ -185,17 +238,22 @@ var render = function (enemy_data) {
     });
   };
 
-  var onCollision = function () {
-    updateBestScore();
-    gameStats.score = 0;
-    gameStats.collisions++;
-    d3.select('.player').attr('xlink:href', 'img/sick.png');
-    d3.timer(function () {
-      d3.select('.player').attr('xlink:href', 'img/smiley.png');
-      return true;
-    }, 1000);
-    updateCollisions();
-    updateScore();
+  var onCollision = function (player, object) {
+    if (object.attr('class') === 'enemy powerup') {
+      gameStats.score+= 100;
+      updateScore();
+    } else if (object.attr('class') === 'enemy') {
+      updateBestScore();
+      gameStats.score = 0;
+      gameStats.collisions++;
+      d3.select('.player').attr('xlink:href', 'img/sick.png');
+      d3.timer(function () {
+        d3.select('.player').attr('xlink:href', 'img/smiley.png');
+        return true;
+      }, 1000);
+      updateCollisions();
+      updateScore();
+    }
   };
 
   var tweenWithCollisionDetection = function(endData) {
@@ -228,7 +286,7 @@ var render = function (enemy_data) {
   enemies
     .transition()
       .duration(500)
-      .attr('r', 10)
+      .attr('r', function(enemy) {return enemy.size; })
     .transition()
       .duration(2000)
       .tween('custom', tweenWithCollisionDetection);
@@ -249,9 +307,14 @@ players.push(player1);
 //players.push(player2);
 
 var play = function () {
+  var activeEnemies = createEnemies();
+
   var gameTurn = function () {
-    var newEnemyPositions = createEnemies();
-    render(newEnemyPositions);
+    _.each(activeEnemies, function (item) {
+      item.updatePosition();
+    });
+
+    render(activeEnemies);
 
     d3.timer(gameTurn, 2000);
     return true;

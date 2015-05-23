@@ -6,7 +6,8 @@ Feel free to use it if you like. */
 
 .container {
   width: 700px;
-  height: 700px;
+  height: 450px;
+  border: 5px solid black;
 }
 .enemy {
   transform-origin: center;
