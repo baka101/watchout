@@ -8,4 +8,6 @@ Feel free to use it if you like. */
   width: 700px;
   height: 700px;
 }
-
+.enemy {
+  background-color: rbg(0,0,0,0);
+}

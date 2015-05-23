@@ -3,7 +3,7 @@
 var gameOptions = {
   height: 450,
   width: 700,
-  nEnemies: 1,
+  nEnemies: 30,
   padding: 20
 };
 
@@ -43,7 +43,7 @@ var updateCollisions = function () {
 
 
 var Player = function (gameOptions) {
-  this.path = 'm-7.5,1.62413c0,-5.04095 4.08318,-9.12413 9.12414,-9.12413c5.04096,0 9.70345,5.53145 11.87586,9.12413c-2.02759,2.72372 -6.8349,9.12415 -11.87586,9.12415c-5.04096,0 -9.12414,-4.08318 -9.12414,-9.12415z';
+  //this.path = 'm-7.5,1.62413c0,-5.04095 4.08318,-9.12413 9.12414,-9.12413c5.04096,0 9.70345,5.53145 11.87586,9.12413c-2.02759,2.72372 -6.8349,9.12415 -11.87586,9.12415c-5.04096,0 -9.12414,-4.08318 -9.12414,-9.12415z';
   this.fill = '#ff6600';
   this.x = 0;
   this.y = 0;
@@ -54,9 +54,12 @@ var Player = function (gameOptions) {
 };
 
 Player.prototype.render = function (to) {
-  this.el = to.append('svg:path')
-          .attr('d', this.path)
-          .attr('fill', this.fill);
+  this.el = to.append('svg:image')
+          .attr('class', 'player')
+          .attr('xlink:href', 'img/smiley.png')
+          .attr('width', '20')
+          .attr('height', '20')
+          //.attr('fill', this.fill);
 
   this.transform({
     x: this.gameOptions.width * 0.5,
@@ -101,7 +104,7 @@ Player.prototype.transform = function (opts) {
   this.setY(opts.y || this.y);
 
   this.el.attr('transform',
-    'rotate(' + this.angle + ',' + this.getX() + ',' + this.getY() +') '+
+    //'rotate(' + this.angle + ',' + this.getX() + ',' + this.getY() +') '+
     'translate(' + this.getX() +',' + this.getY() + ')');
 };
 
@@ -149,31 +152,31 @@ var createEnemies = function () {
 ///////////////////////////////////////////////////////////////
 
 var render = function (enemy_data) {
-  var enemies = gameBoard.selectAll('circle.enemy')
+  var enemies = gameBoard.selectAll('image.enemy')
                     .data(enemy_data, function(d) { return d.id; });
 
-  /*enemies.enter().append('svg:image')
+  enemies.enter().append('svg:image')
             .attr('class', 'enemy')
             .attr('xlink:href', 'img/poop.png')
             .attr('width', '20')
             .attr('height', '20')
-            .attr('cx', function(enemy) { return axes.x(enemy.x); })
-            .attr('cy', function(enemy) { return axes.y(enemy.y); })
-            .attr('r', 0);*/
-
-  enemies.enter().append('svg:circle')
-            .attr('class', 'enemy')
-            .attr('cx', function(enemy) { return axes.x(enemy.x); })
-            .attr('cy', function(enemy) { return axes.y(enemy.y); })
+            .attr('x', function(enemy) { return axes.x(enemy.x); })
+            .attr('y', function(enemy) { return axes.y(enemy.y); })
             .attr('r', 0);
+
+  // enemies.enter().append('svg:circle')
+  //           .attr('class', 'enemy')
+  //           .attr('cx', function(enemy) { return axes.x(enemy.x); })
+  //           .attr('cy', function(enemy) { return axes.y(enemy.y); })
+  //           .attr('r', 0);
 
   enemies.exit().remove();
 
   var checkCollision =  function (enemy, collidedCallback) {
     _(players).each(function(player) {
       var radiusSum =  parseFloat(enemy.attr('r')) + player.r;
-      var xDiff = parseFloat(enemy.attr('cx')) - player.x;
-      var yDiff = parseFloat(enemy.attr('cy')) - player.y;
+      var xDiff = parseFloat(enemy.attr('x')) - player.x;
+      var yDiff = parseFloat(enemy.attr('y')) - player.y;
 
       var separation = Math.sqrt( Math.pow(xDiff,2) + Math.pow(yDiff,2) )
       if (separation < radiusSum) {
@@ -186,6 +189,11 @@ var render = function (enemy_data) {
     updateBestScore();
     gameStats.score = 0;
     gameStats.collisions++;
+    d3.select('.player').attr('xlink:href', 'img/sick.png');
+    d3.timer(function () {
+      d3.select('.player').attr('xlink:href', 'img/smiley.png');
+      return true;
+    }, 1000);
     updateCollisions();
     updateScore();
   };
@@ -195,8 +203,8 @@ var render = function (enemy_data) {
     var enemy = d3.select(this);
 
     var startPos = {
-      x: parseFloat(enemy.attr('cx')),
-      y: parseFloat(enemy.attr('cy'))
+      x: parseFloat(enemy.attr('x')),
+      y: parseFloat(enemy.attr('y'))
     };
 
     var endPos = {
@@ -213,8 +221,8 @@ var render = function (enemy_data) {
         y: startPos.y + (endPos.y - startPos.y)*t
       };
 
-      enemy.attr('cx', enemyNextPos.x)
-            .attr('cy', enemyNextPos.y);
+      enemy.attr('x', enemyNextPos.x)
+            .attr('y', enemyNextPos.y);
     };
   };
 
