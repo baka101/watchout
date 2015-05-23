@@ -124,14 +124,18 @@ Player.prototype.moveRelative = function(dx,dy) {
 Player.prototype.setupDragging = function() {
   var context = this;
 
-  var dragMove = function () {
-    context.moveRelative(d3.event.dx, d3.event.dy);
-  };
+  // var dragMove = function () {
+  //   context.moveRelative(d3.event.dx, d3.event.dy);
+  // };
 
-  var drag = d3.behavior.drag()
-              .on('drag', dragMove);
+  // var drag = d3.behavior.drag()
+  //             .on('drag', dragMove);
 
-  this.el.call(drag);
+  // this.el.call(drag);
+
+  d3.select('svg').on('mousemove', function () {
+    context.moveAbsolute(d3.event.clientX-13, d3.event.clientY-67);
+  });
 
 };
 ///////////////////////////////////////////////////////////////////////
