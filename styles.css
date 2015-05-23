@@ -9,5 +9,16 @@ Feel free to use it if you like. */
   height: 700px;
 }
 .enemy {
+  transform-origin: center;
   background-color: rbg(0,0,0,0);
+  -webkit-animation-iteration-count:infinite;
+  -webkit-animation-timing-function:linear;
+  -webkit-animation-name:wiggle;
+  -webkit-animation-duration:0.25s;
+}
+
+@-webkit-keyframes wiggle {
+0% { -webkit-transform:rotate(-10deg) }
+50% { -webkit-transform:rotate(10deg) }
+100% { -webkit-transform:rotate(-10deg)}
 }

@@ -214,7 +214,6 @@ var render = function (enemy_data) {
 
     return function (t) {
       checkCollision(enemy, onCollision);
-      console.log(t);
 
       var enemyNextPos = {
         x: startPos.x + (endPos.x - startPos.x)*t,
@@ -267,11 +266,21 @@ var play = function () {
 
   gameTurn();
 
+  // var rotateEnemies = function () {
+
+  //   var enemies = d3.selectAll('.enemy')
+  //   enemies.attr('transform', 'rotate(' + 180 + ',' + enemx + ',' + y +')';
+  //   });
+  //   d3.timer(rotateEnemies, 500);
+  //   return true;
+  // }
+
 
   d3.timer(gameTurn, 2000);
   //setInterval(gameTurn, 2000);
   d3.timer(increaseScore, 50);
   //setInterval(increaseScore, 50);
+  //d3.timer(rotateEnemies, 500);
 }
 
 play();
