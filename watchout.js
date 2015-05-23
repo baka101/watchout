@@ -149,14 +149,20 @@ var createEnemies = function () {
 ///////////////////////////////////////////////////////////////
 
 var render = function (enemy_data) {
-  var enemies = gameBoard.selectAll('image.enemy')
+  var enemies = gameBoard.selectAll('circle.enemy')
                     .data(enemy_data, function(d) { return d.id; });
 
-  enemies.enter().append('svg:image')
+  /*enemies.enter().append('svg:image')
             .attr('class', 'enemy')
             .attr('xlink:href', 'img/poop.png')
             .attr('width', '20')
             .attr('height', '20')
+            .attr('cx', function(enemy) { return axes.x(enemy.x); })
+            .attr('cy', function(enemy) { return axes.y(enemy.y); })
+            .attr('r', 0);*/
+
+  enemies.enter().append('svg:circle')
+            .attr('class', 'enemy')
             .attr('cx', function(enemy) { return axes.x(enemy.x); })
             .attr('cy', function(enemy) { return axes.y(enemy.y); })
             .attr('r', 0);
@@ -200,6 +206,7 @@ var render = function (enemy_data) {
 
     return function (t) {
       checkCollision(enemy, onCollision);
+      console.log(t);
 
       var enemyNextPos = {
         x: startPos.x + (endPos.x - startPos.x)*t,
@@ -218,6 +225,8 @@ var render = function (enemy_data) {
     .transition()
       .duration(2000)
       .tween('custom', tweenWithCollisionDetection);
+
+
 };
 /////////////////////////////////////////////////////
 // CREATE PLAYERS AND INITIATE GAME
@@ -236,18 +245,25 @@ var play = function () {
   var gameTurn = function () {
     var newEnemyPositions = createEnemies();
     render(newEnemyPositions);
+
+    d3.timer(gameTurn, 2000);
+    return true;
   };
 
   var increaseScore = function () {
     gameStats.score += 1;
     updateScore();
+    d3.timer(increaseScore, 50);
+    return true;
   };
 
   gameTurn();
-  //d3.timer(gameTurn, 2000);
-  setInterval(gameTurn, 2000);
-  //d3.timer(increaseScore, 1000);
-  setInterval(increaseScore, 50);
+
+
+  d3.timer(gameTurn, 2000);
+  //setInterval(gameTurn, 2000);
+  d3.timer(increaseScore, 50);
+  //setInterval(increaseScore, 50);
 }
 
 play();
