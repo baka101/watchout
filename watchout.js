@@ -3,7 +3,7 @@
 var gameOptions = {
   height: 450,
   width: 700,
-  nEnemies: 30,
+  nEnemies: 1,
   padding: 20
 };
 
@@ -136,9 +136,11 @@ Player.prototype.setupDragging = function() {
 ////////////////////////////////////////////////////////////////////
 var createEnemies = function () {
   return _.range(0, gameOptions.nEnemies).map(function(i) {
-    return {id : i,
+    var obj = {id : i,
       x: Math.random()*100,
       y: Math.random()*100};
+
+    return obj;
   });
 };
 
@@ -147,11 +149,14 @@ var createEnemies = function () {
 ///////////////////////////////////////////////////////////////
 
 var render = function (enemy_data) {
-  var enemies = gameBoard.selectAll('circle.enemy')
+  var enemies = gameBoard.selectAll('image.enemy')
                     .data(enemy_data, function(d) { return d.id; });
 
-  enemies.enter().append('svg:circle')
+  enemies.enter().append('svg:image')
             .attr('class', 'enemy')
+            .attr('xlink:href', 'img/poop.png')
+            .attr('width', '20')
+            .attr('height', '20')
             .attr('cx', function(enemy) { return axes.x(enemy.x); })
             .attr('cy', function(enemy) { return axes.y(enemy.y); })
             .attr('r', 0);
@@ -229,7 +234,7 @@ players.push(player1);
 
 var play = function () {
   var gameTurn = function () {
-    newEnemyPositions = createEnemies();
+    var newEnemyPositions = createEnemies();
     render(newEnemyPositions);
   };
 
@@ -239,7 +244,9 @@ var play = function () {
   };
 
   gameTurn();
+  //d3.timer(gameTurn, 2000);
   setInterval(gameTurn, 2000);
+  //d3.timer(increaseScore, 1000);
   setInterval(increaseScore, 50);
 }
 
